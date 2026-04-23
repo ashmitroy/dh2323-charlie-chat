@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Let Me Ask Charlie — Progress Log</title>
+    <meta
+      name="description"
+      content="Weekly progress documentation for the DH2323 project 'Let Me Ask Charlie' by Ashmit Deb Roy."
+    />
+    <!-- Optional: add ./css/style.css when docs/css exists -->
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <h1 class="project-title">Let Me Ask Charlie</h1>
+        <p class="project-subtitle">
+          DH2323 project log by Ashmit Deb Roy (KTH)
+        </p>
+      </header>
+
+      <section class="status" aria-labelledby="status-heading">
+        <h2 id="status-heading">Current status</h2>
+        <div class="status-grid">
+          <div class="status-card">
+            <div class="status-label">Spec submitted</div>
+            <div class="status-value">Yes</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Repo structure</div>
+            <div class="status-value">Set up</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Shaders</div>
+            <div class="status-value">4 (not wired)</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Game skeleton</div>
+            <div class="status-value">p5.js + state/dialogue/audio</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Assets</div>
+            <div class="status-value">0 sprites / 0 normal maps</div>
+          </div>
+          <div class="status-card">
+            <div class="status-label">Rendering pipeline</div>
+            <div class="status-value">Not implemented</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="log" aria-labelledby="log-heading">
+        <h2 id="log-heading">Weekly log</h2>
+        <div class="log-entries">
+          <article class="log-entry">
+            <div class="entry-meta">Entry 01 · April 2026</div>
+            <h3 class="entry-title">Starting from nothing</h3>
+            <p class="entry-desc">
+              This is the first proper documentation entry. The project
+              technically started on April 21 while I was still figuring out
+              what this project even is. As of April 23, I have a spec document
+              submitted to KTH (voluntary feedback), an empty GitHub repo with the
+              folder structure set up.
+            </p>
+            <p class="entry-desc">
+              What went wrong: I initially gravitated toward Processing (Java)
+              because it is course-standard, and I wrote a full spec for a
+              different concept (“Liminal”). That spec is coherent on paper, but
+              it did not survive contact with my actual constraints and
+              interests. I changed direction, which means I currently have
+              multiple partially-formed starting points: a strong rendering idea
+              (SDF-only antagonist shadow), an incomplete story (characters and
+              world exist, branching narrative does not), and technical unknowns
+              I still need to resolve (grading equivalence for browser-based
+              p5.js + GLSL, whether a three-room vignette is sufficient scope,
+              and how to produce normal maps for 2D pixel art).
+            </p>
+            <p class="entry-desc">
+              Academic anchor: the current technical framing is a graphics-first
+              horror design where the rendering system is the primary expressive
+              layer (dynamic lighting via \(N \cdot L\), SDF-based shadow
+              mathematics, and post-processing artifacts), and the evaluation
+              plan in the submitted spec is a small user study using the
+              Self-Assessment Manikin (SAM) scale with \(n \ge 5\).
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <!-- Optional: add ./js/main.js when docs/js exists -->
+  </body>
+</html>
