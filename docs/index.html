@@ -53,7 +53,7 @@
         <h2 id="log-heading">Weekly log</h2>
         <div class="log-entries">
           <article class="log-entry">
-            <pre class="entry-raw">---
+            <script type="text/markdown" class="entry-md">---
 date: 2026-04-23
 session: 01
 title: "Starting from nothing  spec submitted, repo set up, shaders written by AI"
@@ -144,11 +144,12 @@ Single room, one light source that follows the mouse, one sprite (even a placeho
 - Hart 1996 (sphere tracing)
 
 ---
-</pre>
+            </script>
+            <div class="entry-rendered"></div>
           </article>
 
           <article class="log-entry">
-            <pre class="entry-raw">---
+            <script type="text/markdown" class="entry-md">---
 date: 2026-04-23
 session: 02
 title: "The formulas start making sense. Multiple shadows. Help session prep."
@@ -239,11 +240,12 @@ The thing I do understand: for a 2D sprite that always faces the camera, tangent
 ## What's next
 
 - Watch the normal mapping videos
-</pre>
+            </script>
+            <div class="entry-rendered"></div>
           </article>
 
           <article class="log-entry">
-            <pre class="entry-raw">---
+            <script type="text/markdown" class="entry-md">---
 date: 2026-04-24
 session: 03
 title: "Professor feedback changes everything. Normal mapping clicks. Scope locked."
@@ -256,7 +258,7 @@ tags: [feedback, professor, scope, normal-mapping, pipeline, decisions]
 
 Before the help session, spent time with the GameMaker article and Perplexity. The line that unlocked it:
 
-&gt; "In 2D it will be the normal direction for that particular pixel being shaded."
+> "In 2D it will be the normal direction for that particular pixel being shaded."
 
 In 3D, normals come from geometry  the mesh tells you which way each face points. In 2D there is no geometry. Every pixel sits on the same flat plane, so every pixel would have the same normal: (0, 0, 1)  pointing straight at the camera. No depth, no response to light angle, flat cardboard.
 
@@ -393,11 +395,13 @@ These are the next three things the code will teach me.
 ## Next session goals
 
 1. Understand what a Sobel filter is and why it gives you normals
-2. First code: p5.js in WebGL mode, single shader, mouse position → color gradient. Prove the pipeline works.</pre>
+2. First code: p5.js in WebGL mode, single shader, mouse position → color gradient. Prove the pipeline works.
+            </script>
+            <div class="entry-rendered"></div>
           </article>
 
           <article class="log-entry">
-            <pre class="entry-raw">---
+            <script type="text/markdown" class="entry-md">---
 date: 2026-04-24
 session: 04
 title: "First shader running. GLSL pipeline proven. Point light in 10 lines."
@@ -432,8 +436,8 @@ The simplest possible shader. Every pixel outputs its UV coordinate as a color. 
 **`src/index.html`** (one change from original):
 ```html
 <!-- Changed type="module" to a regular script for p5.js global mode -->
-&lt;script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"&gt;&lt;/script&gt;
-&lt;script src="./js/main.js"&gt;&lt;/script&gt;
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+<script src="./js/main.js"></script>
 ```
 
 **`src/js/main.js`:**
@@ -574,12 +578,23 @@ The pipeline is proven. The next step is the Sobel normal derivation.
 | Date | Tool | Used for |
 | ---- | ---- | -------- |
 |      |      |          |
-</pre>
+            </script>
+            <div class="entry-rendered"></div>
           </article>
         </div>
       </section>
     </main>
 
-    <!-- Optional: add ./js/main.js when docs/js exists -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+      (function () {
+        const mdBlocks = document.querySelectorAll("script.entry-md");
+        for (const md of mdBlocks) {
+          const rendered = md.parentElement?.querySelector(".entry-rendered");
+          if (!rendered) continue;
+          rendered.innerHTML = marked.parse(md.textContent ?? "");
+        }
+      })();
+    </script>
   </body>
 </html>
