@@ -53,36 +53,528 @@
         <h2 id="log-heading">Weekly log</h2>
         <div class="log-entries">
           <article class="log-entry">
-            <div class="entry-meta">Entry 01 · April 2026</div>
-            <h3 class="entry-title">Starting from nothing</h3>
-            <p class="entry-desc">
-              This is the first proper documentation entry. The project
-              technically started on April 21 while I was still figuring out
-              what this project even is. As of April 23, I have a spec document
-              submitted to KTH (voluntary feedback), an empty GitHub repo with the
-              folder structure set up.
-            </p>
-            <p class="entry-desc">
-              What went wrong: I initially gravitated toward Processing (Java)
-              because it is course-standard, and I wrote a full spec for a
-              different concept (“Liminal”). That spec is coherent on paper, but
-              it did not survive contact with my actual constraints and
-              interests. I changed direction, which means I currently have
-              multiple partially-formed starting points: a strong rendering idea
-              (SDF-only antagonist shadow), an incomplete story (characters and
-              world exist, branching narrative does not), and technical unknowns
-              I still need to resolve (grading equivalence for browser-based
-              p5.js + GLSL, whether a three-room vignette is sufficient scope,
-              and how to produce normal maps for 2D pixel art).
-            </p>
-            <p class="entry-desc">
-              Academic anchor: the current technical framing is a graphics-first
-              horror design where the rendering system is the primary expressive
-              layer (dynamic lighting via \(N \cdot L\), SDF-based shadow
-              mathematics, and post-processing artifacts), and the evaluation
-              plan in the submitted spec is a small user study using the
-              Self-Assessment Manikin (SAM) scale with \(n \ge 5\).
-            </p>
+            <pre class="entry-raw">---
+date: 2026-04-23
+session: 01
+title: "Starting from nothing  spec submitted, repo set up, shaders written by AI"
+tags: [setup, spec, research, shaders]
+---
+
+# Entry 01 Starting from nothing
+
+## Where I am
+First proper documentation entry. The project technically started April 21 to figure out what this project even is. As of today (April 23) I have: (nothing is pushed as of yet)
+
+- A spec document submitted to KTH (voluntary feedback, deadline April 24)
+- A GitHub repo with folder structure set up
+- Four GLSL shaders that exist but are not wired to anything 
+- p5.js game skeleton with state machine, dialogue system, audio system, and three room files
+- Zero sprites, zero normal maps, zero actual rendering pipeline
+
+The code that exists was written by AI agents (Cursor / SHADER). I did not write it. I do not yet fully understand it. That is the honest truth and this blog is where I document that journey changing.
+
+---
+
+##  (April 21–22)
+
+Started from the brief: DH2323, Grade A, horror game, custom graphics. Didn't know what tech stack to use.
+
+ I used Perplexity to ask what should i use initially pushed me toward Processing (Java)  the course-standard environment. Generated a full spec under the title "Liminal" with a character named Mira in a school corridor. That spec is good on paper but I changed direction.
+
+Key things that came out of those sessions:
+
+**What I decided:**
+- The antagonist has no sprite. It is rendered entirely as an SDF shadow mathematics only. That became the concept: Charlie Chat.
+- p5.js + GLSL in the browser, not Processing/Java. Faster iteration, runs anywhere, still real GLSL.
+- Story: Charlie (player) and Charlie Chat (antagonist). Based on an original story "Let Me Ask Charlie."
+- The rendering system IS the horror. Lights flicker = shader glitch. Charlie Chat grows = shadow math.
+
+**What is still unresolved:**
+- The full story hasn't been written yet. Characters exist (Charlie, Charlie Chat), world is established, but the branching narrative hasn't been designed.
+-  Would a p5.js + GLSL browser implementation be treated equivalently to a native OpenGL project for grading purposes?
+- Is a three-room interactive vignette sufficient scope for the application layer, given the rendering system is the primary contribution?
+- Any advice on normal map pipeline for 2D pixel art specifically: hand-painted maps vs. procedural derivation?
+
+**The spec that was submitted (April 24 deadline):**
+- Filed under filename: `Charlie-Chat-Spec-v1.pdf`
+- Central research question: How does a custom Normal-Mapped Sprite Pipeline combined with SDF-based dynamic shadows and post-processing atmospheric effects influence player perception of fear, depth, and spatial orientation in a 2D horror context?
+- Included: pipeline description, N·L diffuse math, Quilez SDF shadow formula, user study design (SAM scale, n≥5), milestone plan
+- Did NOT include: the full story (story is still in progress) 
+
+---
+
+## What I learned today (concepts I didn't know before)
+
+**Normal map:** A texture where each pixel's RGB stores which direction that surface is facing. R = facing right, G = facing up, B = facing toward camera. Stored as (128, 128, 255) for a flat surface facing straight at you. With this information, a flat 2D sprite can respond to a moving light as if it has depth.
+
+**N·L dot product:** For each pixel: how directly is the light hitting this surface? If the surface normal and the light direction are aligned (facing each other), the dot product is 1 = full brightness. If they're perpendicular (grazing angle), dot product approaches 0 = dark. That's the whole lighting model in one formula.
+
+**SDF (Signed Distance Field):** For any point in space, it returns how far you are from the nearest shape. Negative = inside the shape. Zero = exactly on the surface. Positive = outside. The shadow shader walks from each pixel toward the light, checking this distance at each step. If it drops below zero, something is blocking the light shadow.
+
+**Sphere tracing (Hart 1996):** Instead of stepping in fixed increments, you step by the SDF value itself if you're 20px away from the shape, you can safely step 20px without missing it. Faster than fixed-step raymarching.
+
+**Soft shadows (Quilez):** Instead of hard shadow/no shadow, accumulate a softness factor during the march: `min(k * h / t, res)`. The closer you come to an occluder, the softer the penumbra. That creeping soft darkness is what makes it feel real.
+
+**Post-processing pass:** After the scene is rendered, run the whole image through another shader. Bloom = bright areas bleed into neighbors (9-tap kernel). Vignette = multiply edges to black via smoothstep. Reinhard tone mapping = prevents whites from clipping. Film grain = hash-based noise added per pixel. Same as Lightroom adjustments but in GLSL.
+
+---
+
+## Open questions I need to answer (not decided yet)
+
+1. **Question:** Does p5.js + GLSL count the same as Processing/Java for grading? → Email this week before building more.
+2. **SDF generation:** Bake the Charlie Chat silhouette offline (Python script draws shape, exports SDF texture) or generate it in a first-pass shader every frame?
+3. **Normal maps:** Hand-paint them in Sprite Illuminator, or derive them procedurally from sprite grayscale height?
+4. **Story:** The narrative branching hasn't been designed. Charlie and Charlie Chat exist. The "Let Me Ask Charlie" premise exists. The actual scene-by-scene structure hasn't been written.
+
+---
+
+## What I am building next
+
+Single room, one light source that follows the mouse, one sprite (even a placeholder) that responds to that light using the normal-map shader. No game logic, no dialogue, no rooms. Just: move mouse → shading on sprite changes. That moment is when the project becomes real.
+
+---
+
+## Resources identified so far
+
+- Inigo Quilez SDF article: https://iquilezles.org/articles/rmshadows/
+- Quilez 2D SDFs: https://iquilezles.org/articles/distfunctions2d/
+- Real-Time Rendering 4th ed., Ch. 9 (N·L diffuse, normal mapping)
+- GPU Gems Vol. 1, Ch. 13 (soft shadows)
+- Reinhard et al. 2002 (tone mapping)
+- Hart 1996 (sphere tracing)
+
+---
+</pre>
+          </article>
+
+          <article class="log-entry">
+            <pre class="entry-raw">---
+date: 2026-04-23
+session: 02
+title: "The formulas start making sense. Multiple shadows. Help session prep."
+tags: [learning, SDF, formulas, normal-maps, session-prep]
+---
+
+# Entry 02  The formulas start making sense
+
+## What happened this session
+
+Continued learning. No code written. This session was about understanding the math behind what needs to be built. Asked Claude to break down the two formulas that kept appearing in the reading but weren't clicking.
+
+---
+
+## The formulas  what they actually mean
+
+### `length(fragPos - charliePos) - radius`
+
+This is the SDF for a circle. Not magic  pure geometry.
+
+- `fragPos - charliePos`: a vector (arrow) pointing from Charlie Chat's center to the current pixel
+- `length(...)`: the distance in pixels between them
+- `- radius`: subtract Charlie Chat's body size, because we want distance from the SURFACE, not the center
+
+If I'm 60px from the center and Charlie Chat's radius is 50px, I'm 10px outside the surface. `60 - 50 = 10`. That's the SDF value.
+
+**Positive** = outside. **Zero** = on the edge. **Negative** = inside.
+
+This formula comes from the definition of a circle: all points exactly at distance r from center. That's literally it. No special graphics knowledge. Just distance minus radius.
+
+### `k * h / t`
+
+This runs every step of the shadow ray march, from pixel P toward the light.
+
+- `t` = how far I've walked along the ray so far
+- `h` = SDF value at my current position (how far from the nearest obstacle)
+- `k` = sharpness constant
+
+The sphere tracing idea (Hart 1996): if the nearest obstacle is 20px away, I can safely step 20px without hitting anything. Big steps in open space, tiny steps near edges. Fast and accurate.
+
+`h/t` approximates the half-angle of the cone from the light that clears the obstacle at this step. Small `h/t` = I nearly grazed something = the pixel is nearly in shadow. Large `h/t` = wide clearance = pixel is lit.
+
+`min(res, k * h / t)` keeps the worst case across all steps. Shadow factor = determined by the closest I came to any obstacle anywhere along the ray.
+
+**The design connection:** low `k` → softer, wider shadows. High `k` → sharper edges. Charlie Chat approaching → lower `k` → shadows spread and soften across the room. That's the horror mechanic. The math does the horror automatically.
+
+---
+
+## Insight: every character casts shadows automatically
+
+Asked whether shadows would work for all moving characters, not just Charlie Chat. Answer: yes, and it's almost free.
+
+The raymarcher evaluates one function  the SDF of the scene. If you define that function as the minimum of all characters' SDFs:
+
+```glsl
+float d = min(sdfCircle(p, charliePos, r), sdfCircle(p, npcPos, r));
+```
+
+Every character casts shadows. All update automatically. You pass positions as uniforms every frame. No extra loop, no extra passes.
+
+The `min()` works because: if you're near ANY obstacle, you want the distance to be small (indicating proximity). The nearest obstacle always wins.
+
+**Also resolved:** Charlie Chat's SDF must be procedural (not a pre-baked texture) because it moves. A baked texture captures one fixed position. A procedural function recalculates correctly every frame when you pass the new position as a uniform.
+
+---
+
+## Normal mapping  still struggling
+
+The Schüler article still isn't clicking. The concept I understand: a normal map stores surface direction as RGB. But the tangent space / TBN conversion is where it stops making sense.
+
+Going to watch videos before coming back to the article:
+1. "Normal Maps Explained in Simple Terms" YouTube
+2. "Make Your 2D Sprites Look Like 3D Using Normal Maps"  YouTube (Unity but concept is the same)
+3. GameMaker blog on 2D normal mapping (specific to 2D, should be clearer)
+
+The thing I do understand: for a 2D sprite that always faces the camera, tangent space is roughly screen space. Schüler's full method might not be needed.
+
+---
+
+## AI usage log  Week 1 continued
+
+| Date | Tool | Used for |
+|---|---|---|
+| 2026-04-23 | Claude Code (Sage) | Formula breakdown (SDF circle, Quilez shadow), multi-character shadow insight, documentation structure, video research |
+
+---
+
+## What's next
+
+- Watch the normal mapping videos
+</pre>
+          </article>
+
+          <article class="log-entry">
+            <pre class="entry-raw">---
+date: 2026-04-24
+session: 03
+title: "Professor feedback changes everything. Normal mapping clicks. Scope locked."
+tags: [feedback, professor, scope, normal-mapping, pipeline, decisions]
+---
+
+# Entry 03  Professor feedback changes everything
+
+## Normal mapping finally clicked
+
+Before the help session, spent time with the GameMaker article and Perplexity. The line that unlocked it:
+
+&gt; "In 2D it will be the normal direction for that particular pixel being shaded."
+
+In 3D, normals come from geometry  the mesh tells you which way each face points. In 2D there is no geometry. Every pixel sits on the same flat plane, so every pixel would have the same normal: (0, 0, 1)  pointing straight at the camera. No depth, no response to light angle, flat cardboard.
+
+The normal map fixes this by storing fake normals per pixel as an RGB image:
+- Red = facing right (+X)
+- Green = facing up (+Y)
+- Blue = facing toward camera (+Z)
+- (128, 128, 255) = flat, facing straight at camera
+
+The shader reads this instead of assuming (0, 0, 1) everywhere. Now each pixel has a unique direction and responds to light differently. A cheek curves away from the light. A shoulder catches it. All without any 3D geometry.
+
+**Three ways to make a normal map for a 2D sprite:**
+1. Hand-paint RGB colours directly (slowest, most control)
+2. Paint a greyscale height map → software generates normals from gradients (fastest, intuitive)
+3. 3D model → render normal pass (studio method, overkill)
+
+Method 2 is what we were going to do. The professor has now pushed further.
+
+---
+
+## The professor's feedback  Christopher Peters
+
+Got written feedback on the spec. Four answers, one warning.
+
+**Q1  p5.js vs Processing:**
+Confirmed fine. "The algorithmic level (implementation and evaluation related) are what matter in the course." Platform doesn't matter. The math matters.
+
+**Q3  Normal map approach:**
+"Procedural approaches much more interesting since this is a computer graphics course."
+Don't hand-paint normal maps. Don't even use a software generator. **Derive the normals in the GLSL shader itself**, from a greyscale height map, using gradient math. That's the academically interesting version.
+
+**Q4  Three rooms:**
+"Use your time to create depth rather than breadth. Choose the minimal scenario necessary to demonstrate your technique and use the saved time to investigate aspects such as evaluation approaches."
+Fewer rooms. One room done properly is better than three rooms done shallowly.
+
+**The warning:**
+"Additional aspects such as story and character design are not relevant to the course. Only the 'Normal-Mapped Sprite Pipeline in the browser' technique  so be careful about that."
+"It is easy for this sort of project to hit a B or C grade."
+
+This is the clearest signal I've received. The story, the branching narrative, the character names and horror atmosphere  none of it is graded. Spending time on that is spending time away from what gets the A.
+
+---
+
+## What this changes
+
+**Story and narrative:** minimal. One room. The scenario exists only to demonstrate the technique  moving light, environment responding, Charlie Chat shadow growing. That's it.
+
+**Normal maps:** procedural derivation in the shader. A greyscale height map of the environment goes in. The shader computes the normal from the gradient of that height map. No software tools for normal generation. Pure math.
+
+**Characters:** flat 2D cartoony, no normal mapping. This was already decided today (see below) and the professor confirms the direction  focus on the environment pipeline, not the characters.
+
+**Evaluation:** more important than I thought. This is part of the A-grade criteria. The user study comparing full pipeline vs flat rendering needs to be properly designed with defensible metrics.
+
+**Literature:** not just citations. Actually engage with the papers. Know what Hart (1996) says about sphere tracing. Know what the Reinhard tone mapping paper actually argues.
+
+---
+
+## The design decision locked today (before professor feedback)
+
+**Environment gets normal mapping. Characters stay flat 2D.**
+
+ The reasoning:
+
+1. **Time.** A 6-frame walk cycle in 4 directions = 24 normal maps to paint by hand. Keeping characters flat cuts art production time by ~80%.
+
+2. **Aesthetics.** Flat cartoony characters in a physically-lit environment creates visual dissonance  the character looks like it doesn't belong in the world. That dissonance is the horror. It reinforces the "uncanny" tone without any extra rendering work.
+
+The professor's feedback confirms this is the right call  environment pipeline is the contribution, not the characters.
+
+---
+
+## Rendering pipeline locked (4 passes)
+
+```
+Pass 1: Environment
+  Input: background texture + greyscale height map
+  Process: GLSL fragment shader  derive normal from height gradient, compute N·L diffuse
+  Output: lit environment to framebuffer
+
+Pass 2: Characters
+  Input: flat sprites (Charlie, NPCs)
+  Process: draw directly, no shader  maybe distance-based flat tint for basic light response
+  Output: composited on top of Pass 1
+
+Pass 3: SDF Shadow (Charlie Chat)
+  Input: Charlie Chat's screen position as uniform
+  Process: SDF raymarcher  procedural circle SDF, Quilez soft shadow formula
+  Output: shadow mask composited over scene
+
+Pass 4: Post-Processing
+  Input: full composited scene
+  Process: bloom, vignette, film grain, Reinhard tone mapping, chromatic aberration
+  Output: final frame
+```
+
+This is now the canonical pipeline. Everything gets built to this spec.
+
+---
+
+## What "procedural normal derivation" means
+
+Instead of providing a pre-computed normal map texture, provide a **greyscale height map** a simple image where white = surface raised toward the camera, black = surface pushed away.
+
+In the GLSL shader, I compute the gradient of this height map using neighbouring pixels (Sobel filter or screen-space derivatives). The gradient tells about the slope. The slope gives the normal direction.
+
+This is more academically interesting because:
+- No separate normal map texture to author or store
+- The derivation happens live in the shader every frame
+- It proves that I understand the relationship between height fields and surface normals  the actual mathematics
+
+I don't fully understand Sobel yet. That's the next thing to learn.
+
+---
+
+## What I still don't understand
+
+- Sobel filter  what it is, how it computes gradients from a texture
+- How to structure a multi-pass pipeline in p5.js (createFramebuffer, how textures pass between passes)
+- The full raymarching loop I understand each step individually but haven't written it
+
+These are the next three things the code will teach me.
+
+---
+
+## AI usage log
+
+| Date       | Tool                                    | Used for                                                                                          |
+| ---------- | --------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 2026-04-24 | Perplexity (Claude Sonnet 4.6 Thinking) | Normal mapping understanding, design decision (flat chars vs env normal maps), pipeline structure |
+
+
+---
+
+## Next session goals
+
+1. Understand what a Sobel filter is and why it gives you normals
+2. First code: p5.js in WebGL mode, single shader, mouse position → color gradient. Prove the pipeline works.</pre>
+          </article>
+
+          <article class="log-entry">
+            <pre class="entry-raw">---
+date: 2026-04-24
+session: 04
+title: "First shader running. GLSL pipeline proven. Point light in 10 lines."
+tags: [code, glsl, p5js, shader, breakthrough, pipeline]
+media:
+  - screenshot: "Screenshot 2026-04-24 at 3.37.27 PM.png"  UV gradient, first shader working
+  - recording: "Screen Recording 2026-04-24 at 3.40.33 PM.mov"  mouse-driven point light
+---
+
+# Entry 04  First shader running
+
+## What happened
+
+First real code written and understood. Three files, zero libraries beyond p5.js. GLSL is running in the browser. The JS-to-shader pipeline is proven.
+
+Built two things in sequence:
+1. UV gradient  proved GLSL runs and interpolation works
+2. Mouse-driven point light  proved JavaScript talks to the shader in real time
+
+---
+
+## Step 1: UV gradient
+
+The simplest possible shader. Every pixel outputs its UV coordinate as a color. No logic, no math  just "show me what vTexCoord is."
+
+**What you see:** Black at bottom-left. Red increases to the right. Green increases upward. Blue fixed at 0.5 everywhere. Smooth transitions across the full canvas.
+
+**Screenshot:** `Screenshot 2026-04-24 at 3.37.27 PM.png`
+![[Screenshot 2026-04-24 at 3.37.27 PM.png]]
+### The code  three files
+
+**`src/index.html`** (one change from original):
+```html
+<!-- Changed type="module" to a regular script for p5.js global mode -->
+&lt;script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"&gt;&lt;/script&gt;
+&lt;script src="./js/main.js"&gt;&lt;/script&gt;
+```
+
+**`src/js/main.js`:**
+```javascript
+let myShader;
+
+function preload() {
+  // p5.js fetches the shader files over HTTP before setup runs
+  myShader = loadShader('shaders/hello.vert', 'shaders/hello.frag');
+}
+
+function setup() {
+  createCanvas(960, 540, WEBGL); // third arg = WebGL mode, enables GLSL
+  noStroke();
+}
+
+function draw() {
+  shader(myShader);                                        // activate our shader
+  myShader.setUniform('uResolution', [width, height]);    // send canvas size to shader
+  myShader.setUniform('uMouse', [mouseX / width, mouseY / height]); // send mouse (normalized)
+  plane(width, height);                                   // draw fullscreen quad  triggers fragment shader
+}
+```
+
+**`src/shaders/hello.vert`:**
+```glsl
+attribute vec3 aPosition;   // vertex position  p5.js provides this automatically
+attribute vec2 aTexCoord;   // UV coordinate per vertex  p5.js provides this too
+varying vec2 vTexCoord;     // we pass UV to the fragment shader via 'varying'
+
+uniform mat4 uModelViewMatrix;   // camera/world transform  p5.js provides
+uniform mat4 uProjectionMatrix;  // perspective/orthographic  p5.js provides
+
+void main() {
+  vTexCoord = aTexCoord;
+  // Transform vertex position from model space to clip space using p5's matrices
+  gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0);
+}
+```
+
+**`src/shaders/hello.frag` (UV version):**
+```glsl
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec2 vTexCoord; // received from vertex shader, interpolated by GPU
+
+void main() {
+  // Output UV as color: x = red (left→right), y = green (bottom→top), z = fixed blue
+  gl_FragColor = vec4(vTexCoord.x, vTexCoord.y, 0.5, 1.0);
+}
+```
+
+---
+
+## What I learned: interpolation
+
+
+The vertex shader runs **4 times** (once per corner of the quad). The fragment shader runs **518,400 times** (960 × 540, once per pixel). The `varying vec2 vTexCoord` value at each corner is:
+- Bottom-left: `(0, 0)`
+- Bottom-right: `(1, 0)`
+- Top-left: `(0, 1)`
+- Top-right: `(1, 1)`
+
+The GPU **linearly interpolates** these values across every pixel automatically. A pixel halfway across the screen gets `vTexCoord.x = 0.5`. This is called **barycentric interpolation**  built into the GPU hardware. 
+
+**What decides the gradient size:** the UV range goes 0→1 exactly once across the `plane(width, height)`. To make it steeper, multiply: `vTexCoord.x * 4.0` repeats the gradient 4 times before clamping.
+
+**Why this matters for the project:** the same `varying vec2 vTexCoord` mechanism carries texture coordinates to the fragment shader when we sample the height map for Sobel normal derivation. The principle is identical  just the data changes.
+
+---
+
+## Step 2: Mouse-driven point light
+
+Updated `hello.frag` to use a `uMouse` uniform instead of UV. Mouse position normalized to 0→1 (same space as UV). Compute Euclidean distance from each pixel to the mouse. Flip it: near = bright, far = dark.
+
+**`src/shaders/hello.frag` (point light version):**
+```glsl
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec2 vTexCoord;
+uniform vec2 uMouse;        // mouse position, normalized 0→1 by JavaScript
+
+void main() {
+  vec2 toLight = uMouse - vTexCoord;   // vector from this pixel to the light (mouse)
+  float dist = length(toLight);         // Euclidean distance: sqrt(x² + y²)
+  float brightness = 1.0 - dist;       // near = bright (dist≈0), far = dark (dist≈1+)
+  gl_FragColor = vec4(vec3(brightness), 1.0); // same value in RGB = greyscale
+}
+```
+
+**`main.js` change (one line added to draw()):**
+```javascript
+myShader.setUniform('uMouse', [mouseX / width, mouseY / height]);
+```
+
+**What you see:** white circle of light centered on the cursor, falling off to black. Move mouse to a corner  the circle is in the corner. Move to center  it fills the screen more evenly.
+
+**Screen recording:** `Screen Recording 2026-04-24 at 3.40.33 PM.mov`![[Screen Recording 2026-04-24 at 3.40.33 PM.mov]]
+
+---
+
+## What I learned: uniforms and the data pipeline
+
+- `uniform` = a variable sent from JavaScript to the shader. Same value for every pixel in a frame.
+- `varying` = a variable sent from the vertex shader to the fragment shader. Different per pixel (interpolated).
+- `mouseX / width` = normalizes mouse to 0→1 to match UV space. Without this, the mouse coords (0→960) would be in a completely different scale than vTexCoord (0→1).
+
+The full data flow this session:
+```
+JavaScript (CPU)
+  → setUniform('uMouse', [...])
+    → GLSL uniform vec2 uMouse (GPU)
+      → used in fragment shader per pixel
+        → gl_FragColor output
+          → pixel on screen
+```
+
+---
+
+## Why this matters for the project
+
+`length(uMouse - vTexCoord)` is the exact distance calculation used in the point light attenuation in the full pipeline. The only thing missing from the real lighting shader is the **N·L dot product**  which is where the normal map comes in.
+
+Right now: every pixel has the same "fake" normal (pointing straight at camera). The light hits every pixel identically regardless of angle  that's why the falloff is perfectly circular.
+
+When we add the normal map: each pixel will have a unique direction. The same distance calculation stays, but multiplied by `dot(normal, lightDir)`. Surfaces facing the light get bright. Surfaces angled away get dark. That's the whole normal-mapped lighting model.
+
+The pipeline is proven. The next step is the Sobel normal derivation.
+
+---
+
+## AI usage log
+
+| Date | Tool | Used for |
+| ---- | ---- | -------- |
+|      |      |          |
+</pre>
           </article>
         </div>
       </section>
