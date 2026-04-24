@@ -9,6 +9,73 @@
       content="Weekly progress documentation for the DH2323 project 'Let Me Ask Charlie' by Ashmit Deb Roy."
     />
     <!-- Optional: add ./css/style.css when docs/css exists -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github-dark.min.css"
+    />
+    <style>
+      /* Minimal rendering defaults (no docs/css edits required) */
+      body {
+        margin: 0;
+        padding: 24px;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        line-height: 1.55;
+      }
+
+      .page {
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+
+      .status-card {
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 10px;
+        padding: 12px;
+      }
+
+      .status-label {
+        font-size: 12px;
+        opacity: 0.75;
+      }
+
+      .status-value {
+        font-weight: 600;
+        margin-top: 4px;
+      }
+
+      .log-entry {
+        margin-top: 28px;
+        padding-top: 28px;
+        border-top: 1px solid rgba(0, 0, 0, 0.12);
+      }
+
+      .entry-rendered pre {
+        overflow: auto;
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+
+      .entry-rendered code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 0.95em;
+      }
+
+      .entry-rendered img,
+      .entry-rendered video {
+        max-width: 100%;
+        border-radius: 10px;
+        display: block;
+        margin: 12px 0;
+      }
+    </style>
   </head>
   <body>
     <main class="page">
@@ -586,13 +653,72 @@ The pipeline is proven. The next step is the Sobel normal derivation.
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
     <script>
       (function () {
+        marked.setOptions({
+          gfm: true,
+          headerIds: false,
+          mangle: false,
+          highlight: function (code, lang) {
+            try {
+              if (lang && hljs.getLanguage(lang)) {
+                return hljs.highlight(code, { language: lang }).value;
+              }
+              return hljs.highlightAuto(code).value;
+            } catch {
+              return code;
+            }
+          },
+        });
+
+        function escapeHtmlAttr(s) {
+          return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
+        }
+
+        function toMediaHtml(fileNameRaw) {
+          const fileName = fileNameRaw.trim();
+          const lower = fileName.toLowerCase();
+          const src = "./media/" + encodeURIComponent(fileName);
+
+          if (lower.endsWith(".mov") || lower.endsWith(".mp4") || lower.endsWith(".webm")) {
+            return (
+              '<video controls playsinline preload="metadata" src="' +
+              escapeHtmlAttr(src) +
+              '"></video>'
+            );
+          }
+
+          // default: treat as image
+          return (
+            '<img loading="lazy" alt="' +
+            escapeHtmlAttr(fileName) +
+            '" src="' +
+            escapeHtmlAttr(src) +
+            '"/>'
+          );
+        }
+
+        function preprocessObsidianEmbeds(mdText) {
+          // Convert Obsidian embeds: ![[file.ext]] -> <img/video src="./media/file.ext">
+          // Render-only transform; original markdown is preserved in the page.
+          return mdText.replace(/!\[\[([^\]]+?)\]\]/g, function (_m, inner) {
+            return toMediaHtml(inner);
+          });
+        }
+
         const mdBlocks = document.querySelectorAll("script.entry-md");
         for (const md of mdBlocks) {
           const rendered = md.parentElement?.querySelector(".entry-rendered");
           if (!rendered) continue;
-          rendered.innerHTML = marked.parse(md.textContent ?? "");
+          const raw = md.textContent ?? "";
+          const preprocessed = preprocessObsidianEmbeds(raw);
+          rendered.innerHTML = marked.parse(preprocessed);
+          rendered.querySelectorAll("pre code").forEach((el) => hljs.highlightElement(el));
         }
       })();
     </script>
